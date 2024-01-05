@@ -61,6 +61,7 @@ exports.logout = async (req, res) => {
     .sendStatus(200)
 };
 
+
 exports.checkAuth = async (req, res) => {
   if (req.user) {
     res.json(req.user);
