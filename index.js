@@ -55,14 +55,15 @@ server.use(
 server.use(express.json()); // to parse req.body
 // we can also use JWT token for client-only auth
 server.use('/auth', authRouter.router);
-server.use('/products', isAuth(), productsRouter.router);
-server.use('/categories',isAuth(), categoriesRouter.router);
-server.use('/brands',isAuth(), brandsRouter.router);
+server.use('/products', productsRouter.router);
+server.use('/categories', categoriesRouter.router);
+server.use('/brands', brandsRouter.router);
 server.use('/users', isAuth(), usersRouter.router);
 server.use('/cart', isAuth(), cartRouter.router);
 server.use('/orders', isAuth(), ordersRouter.router);
 
 server.use('*',(req,res)=>{res.sendFile(path.resolve('build','index.html'))});
+
 // Passport Strategies
 passport.use(
   'local',
@@ -75,19 +76,13 @@ passport.use(
       if (!user) {
         return done(null, false, { message: 'invalid credentials' }); // for safety
       }
-      crypto.pbkdf2(
-        password,
-        user.salt,
-        310000,
-        32,
-        'sha256',
-        async function (err, hashedPassword) {
+      crypto.pbkdf2(password,user.salt,310000,32,'sha256',
+        async function (err, hashedPassword)
+        {
           if (!crypto.timingSafeEqual(user.password, hashedPassword)) {
             return done(null, false, { message: 'invalid credentials' });
           }
-          const token = jwt.sign(
-            sanitizeUser(user),
-            process.env.JWT_SECRET_KEY);
+          const token = jwt.sign(sanitizeUser(user),process.env.JWT_SECRET_KEY);
           done(null, {id:user.id, role:user.role,token:token}); // this lines sends to serializer
         }
       );
